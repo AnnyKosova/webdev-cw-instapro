@@ -196,3 +196,14 @@
   width: 100%;
   text-align: center;
 }
+.like-button img {
+  transition: transform 0.3s ease;
+}
+
+.like-button:hover img {
+  transform: scale(1.1);
+}
+
+.like-button:active img {
+  transform: scale(0.9);
+}
