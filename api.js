@@ -1,5 +1,5 @@
-const personalKey = "prod";
-const baseHost = "https://webdev-hw-api.vercel.app";
+const personalKey = "anna-kosova";
+const baseHost = "https://wedev-api.sky.pro";
 const postsHost = `${baseHost}/api/v1/${personalKey}/instapro`;
 
 export function getPosts({ token }) {
@@ -9,17 +9,16 @@ export function getPosts({ token }) {
       Authorization: token,
     },
   })
-    .then((response) => {
-      if (!response.ok) {
-        return response.json().then(err => {
-          throw new Error(err.message || "Ошибка при загрузке постов");
-        });
-      }
-      return response.json();
-    })
-    .then((data) => {
-      return data.posts;
-    });
+  .then((response) => {
+    if (!response.ok) {
+      throw new Error("Ошибка при загрузке постов");
+    }
+    return response.json();
+  })
+  .then((data) => {
+    console.log("Получены посты:", data.posts); 
+    return data.posts; 
+  });
 }
 
 export function getUserPosts({ token, userId }) {
@@ -42,79 +41,94 @@ export function getUserPosts({ token, userId }) {
     });
 }
 
-export function registerUser({ login, password, name, imageUrl }) {
-  return fetch(baseHost + "/api/user", {
+export function registerUser({ login, password, name }) { 
+  return fetch(`${baseHost}/api/user`, {
     method: "POST",
     body: JSON.stringify({
       login,
       password,
       name,
-      imageUrl,
     }),
   })
-    .then((response) => {
-      if (!response.ok) {
-        return response.json().then(err => {
-          throw new Error(err.message || "Ошибка при регистрации");
-        });
-      }
-      return response.json();
-    });
+  .then(async (response) => {
+    const data = await response.json();
+    if (!response.ok) {
+      console.error("Registration error details:", data);
+      throw new Error(data.message || data.error || "Ошибка при регистрации");
+    }
+    return data;
+  });
 }
 
 export function loginUser({ login, password }) {
-  return fetch(baseHost + "/api/user/login", {
+  return fetch(`${baseHost}/api/user/login`, {  
     method: "POST",
     body: JSON.stringify({
       login,
       password,
     }),
   })
-    .then((response) => {
-      if (!response.ok) {
-        return response.json().then(err => {
-          throw new Error(err.message || "Ошибка при входе");
-        });
-      }
-      return response.json();
-    });
+  .then((response) => {
+    if (!response.ok) {
+      return response.json().then(err => {
+        throw new Error(err.message || "Ошибка при входе");
+      });
+    }
+    return response.json();
+  });
 }
 
 export function uploadImage({ file }) {
   const data = new FormData();
   data.append("file", file);
 
-  return fetch(baseHost + "/api/upload/image", {
+  return fetch("https://wedev-api.sky.pro/api/upload/image", {
     method: "POST",
     body: data,
   })
     .then((response) => {
       if (!response.ok) {
-        return response.json().then(err => {
-          throw new Error(err.message || "Ошибка при загрузке изображения");
-        });
+        console.error("Upload failed:", response.status, response.statusText);
+        throw new Error(`Ошибка загрузки: ${response.status} ${response.statusText}`);
       }
       return response.json();
+    })
+    .catch((error) => {
+      console.error("Upload error:", error);
+      throw error;
     });
 }
 
 export function addPost({ token, description, imageUrl }) {
+  console.log("Формируем запрос с:", { 
+    token: token ? "есть" : "отсутствует",
+    description, 
+    imageUrl 
+  });
+  
   return fetch(postsHost, {
     method: "POST",
     headers: {
       Authorization: token,
-      "Content-Type": "application/json",
     },
-    body: JSON.stringify({ description, imageUrl }),
+    body: JSON.stringify({ 
+      description: description.trim(),
+      imageUrl 
+    }),
   })
-    .then((response) => {
-      if (!response.ok) {
-        return response.json().then(err => {
-          throw new Error(err.message || "Ошибка при добавлении поста");
-        });
-      }
-      return response.json();
+  .then(async (response) => {
+    const data = await response.json();
+    console.log("Полный ответ сервера:", {
+      status: response.status,
+      statusText: response.statusText,
+      data
     });
+    
+    if (!response.ok) {
+      throw new Error(data.message || JSON.stringify(data) || "Ошибка при добавлении поста");
+    }
+    return data;
+  });
 }
 
 export function likePost({ token, postId }) {

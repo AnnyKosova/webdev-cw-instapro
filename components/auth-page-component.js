@@ -34,6 +34,7 @@ export function renderAuthPageComponent({ appEl, setUser }) {
     const appHtml = `
       <div class="page-container">
           <div class="header-container"></div>
+          <button class="button secondary-button" id="back-to-feed-btn" style="margin: 10px 0 16px 0;">← Назад к ленте</button>
           <div class="form">
               <h3 class="form-title">
                 ${
@@ -72,6 +73,11 @@ export function renderAuthPageComponent({ appEl, setUser }) {
 
     appEl.innerHTML = appHtml;
 
+    document.getElementById("back-to-feed-btn").addEventListener("click", () => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      import('../index.js').then(({ goToPage }) => goToPage('posts'));
+    });
+
     /**
      * Устанавливает сообщение об ошибке в форме.
      * @param {string} message - Текст сообщения об ошибке.
@@ -80,12 +86,10 @@ export function renderAuthPageComponent({ appEl, setUser }) {
       appEl.querySelector(".form-error").textContent = message;
     };
 
-    // Рендерим заголовок страницы
     renderHeaderComponent({
       element: document.querySelector(".header-container"),
     });
 
-    // Если режим регистрации, рендерим компонент загрузки изображения
     const uploadImageContainer = appEl.querySelector(".upload-image-container");
     if (uploadImageContainer) {
       renderUploadImageComponent({
@@ -96,12 +100,10 @@ export function renderAuthPageComponent({ appEl, setUser }) {
       });
     }
 
-    // Обработка клика на кнопку входа/регистрации
     document.getElementById("login-button").addEventListener("click", () => {
       setError("");
 
       if (isLoginMode) {
-        // Обработка входа
         const login = document.getElementById("login-input").value;
         const password = document.getElementById("password-input").value;
 
@@ -124,7 +126,6 @@ export function renderAuthPageComponent({ appEl, setUser }) {
             setError(error.message);
           });
       } else {
-        // Обработка регистрации
         const login = document.getElementById("login-input").value;
         const name = document.getElementById("name-input").value;
         const password = document.getElementById("password-input").value;
@@ -144,29 +145,28 @@ export function renderAuthPageComponent({ appEl, setUser }) {
           return;
         }
 
-        if (!imageUrl) {
-          alert("Не выбрана фотография");
-          return;
-        }
-
-        registerUser({ login, password, name, imageUrl })
+        registerUser({ login, password, name })
           .then((user) => {
             setUser(user.user);
           })
           .catch((error) => {
-            console.warn(error);
-            setError(error.message);
+            console.warn("Registration error:", error);
+            console.log('API error message:', error.message);
+            const msg = error.message || "Произошла ошибка при регистрации";
+            if (msg.toLowerCase().includes("существует") || msg.toLowerCase().includes("exists")) {
+              setError("Пользователь с таким логином уже существует. Придумайте другой логин.");
+            } else {
+              setError(msg);
+            }
           });
       }
     });
 
-    // Обработка переключения режима (вход ↔ регистрация)
     document.getElementById("toggle-button").addEventListener("click", () => {
       isLoginMode = !isLoginMode;
-      renderForm(); // Перерисовываем форму с новым режимом
+      renderForm(); 
     });
   };
 
-  // Инициализация формы
   renderForm();
 }

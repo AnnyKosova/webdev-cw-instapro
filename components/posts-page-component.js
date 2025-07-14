@@ -1,17 +1,26 @@
+import { dislikePost, likePost } from "../api.js";
+import { getToken, posts, user } from '../app-state.js';
+import { goToPage, renderApp } from '../index.js';
 import { POSTS_PAGE, USER_POSTS_PAGE } from "../routes.js";
 import { renderHeaderComponent } from "./header-component.js";
-import { posts, goToPage, getToken, user, renderApp } from "../index.js";
-import { formatDistanceToNow } from 'date-fns';
-import { ru } from 'date-fns/locale/ru';
-import { likePost, dislikePost } from "../api.js";
+
+function escapeHTML(str) {
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
 
 export function renderPostsPageComponent({ appEl, isUserPage = false, userId = null }) {
-  // Фильтруем посты, если это страница пользователя
+    console.log("Старт рендера. Посты:", posts.length);
+    
+    appEl.innerHTML = '';
   const displayedPosts = isUserPage 
     ? posts.filter(post => post.user.id === userId)
     : posts;
 
-  // Формируем заголовок
   const headerHtml = isUserPage
     ? `<div class="header-container">
          <div class="page-header">
@@ -21,14 +30,21 @@ export function renderPostsPageComponent({ appEl, isUserPage = false, userId = n
        </div>`
     : `<div class="header-container"></div>`;
 
+  let infoBannerHtml = '';
+  if (!user && !isUserPage) {
+    infoBannerHtml = `
+      <div class="info-banner" style="background:#f0f4ff;padding:16px 20px;margin-bottom:16px;border-radius:8px;text-align:center;">
+        <span style="font-size:16px;">Войдите или зарегистрируйтесь, чтобы делиться своими фото и ставить лайки!</span>
+      </div>
+    `;
+  }
+
   const postsHtml = displayedPosts.map((post) => {
-    const createdAt = formatDistanceToNow(new Date(post.createdAt), {
-      addSuffix: true,
-      locale: ru,
-    });
+    console.log("Рендер поста:", post.id); 
+    const createdAt = dayjs(post.createdAt).fromNow();
 
     return `
-      <li class="post">
+      <li class="post post-fade-in">
         <div class="post-header" data-user-id="${post.user.id}">
           <img src="${post.user.imageUrl}" class="post-header__user-image">
           <p class="post-header__user-name">${post.user.name}</p>
@@ -46,7 +62,7 @@ export function renderPostsPageComponent({ appEl, isUserPage = false, userId = n
         </div>
         <p class="post-text">
           <span class="user-name">${post.user.name}</span>
-          ${post.description}
+          ${escapeHTML(post.description)}
         </p>
         <p class="post-date">
           ${createdAt}
@@ -58,6 +74,7 @@ export function renderPostsPageComponent({ appEl, isUserPage = false, userId = n
   const appHtml = `
     <div class="page-container">
       ${headerHtml}
+      ${infoBannerHtml}
       <ul class="posts">
         ${postsHtml.length ? postsHtml : '<p class="no-posts-message">Пользователь пока не добавил постов</p>'}
       </ul>
@@ -67,18 +84,15 @@ export function renderPostsPageComponent({ appEl, isUserPage = false, userId = n
   appEl.innerHTML = appHtml;
 
   if (isUserPage) {
-    // Обработка кнопки "Назад"
     document.querySelector(".back-button").addEventListener("click", () => {
       goToPage(POSTS_PAGE);
     });
   } else {
-    // Обычный рендеринг хедера
     renderHeaderComponent({
       element: document.querySelector(".header-container"),
     });
   }
 
-  // Обработка клика на пользователя (переход на страницу пользователя)
   document.querySelectorAll(".post-header").forEach((userEl) => {
     userEl.addEventListener("click", () => {
       goToPage(USER_POSTS_PAGE, {
@@ -87,7 +101,6 @@ export function renderPostsPageComponent({ appEl, isUserPage = false, userId = n
     });
   });
 
-  // Обработка лайков
   document.querySelectorAll(".like-button").forEach((likeButton) => {
     likeButton.addEventListener("click", () => {
       if (!user) {
@@ -122,4 +135,13 @@ export function renderPostsPageComponent({ appEl, isUserPage = false, userId = n
       }
     });
   });
+
+  if (!isUserPage && !user) {
+    document.querySelector(".login-banner-btn")?.addEventListener("click", () => {
+      goToPage("auth");
+    });
+    document.querySelector(".register-banner-btn")?.addEventListener("click", () => {
+      goToPage("auth");
+    });
+  }
 }

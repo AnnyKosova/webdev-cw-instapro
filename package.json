@@ -1,11 +1,8 @@
 {
-  "dependencies": {
-    "@babel/runtime": "^7.27.6",
-    "date-fns": "^4.1.0"
-  },
   "name": "webdev-cw-instapro",
   "version": "1.0.0",
   "description": "MVP социальной сети для обмена фотографиями",
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -20,5 +17,9 @@
   "bugs": {
     "url": "https://github.com/AnnyKosova/webdev-cw-instapro/issues"
   },
-  "homepage": "https://github.com/AnnyKosova/webdev-cw-instapro#readme"
+  "homepage": "https://github.com/AnnyKosova/webdev-cw-instapro#readme",
+  "dependencies": {
+    "@babel/runtime": "^7.27.6",
+    "date-fns": "^2.29.3"
+  }
 }

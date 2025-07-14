@@ -1,4 +1,5 @@
-import { goToPage, logout, user } from "../index.js";
+import { logout, user } from '../app-state.js'; 
+import { goToPage } from '../index.js';
 import { ADD_POSTS_PAGE, AUTH_PAGE, POSTS_PAGE, USER_POSTS_PAGE } from "../routes.js";
 
 /**
@@ -10,7 +11,6 @@ import { ADD_POSTS_PAGE, AUTH_PAGE, POSTS_PAGE, USER_POSTS_PAGE } from "../route
  * @returns {HTMLElement} Возвращает элемент заголовка после рендеринга.
  */
 export function renderHeaderComponent({ element, currentPage }) {
-  // Рендерим для страницы пользователя
   if (currentPage === USER_POSTS_PAGE) {
     element.innerHTML = `
       <div class="page-header">
@@ -26,11 +26,10 @@ export function renderHeaderComponent({ element, currentPage }) {
     return element;
   }
 
-  // Стандартный рендеринг для других страниц
   element.innerHTML = `
     <div class="page-header">
       <h1 class="logo">instapro</h1>
-      <button class="header-button add-or-login-button">
+      <button class="header-button add-or-login-button${user ? '' : ' login-header-btn'}">
         ${
           user
             ? `<div title="Добавить пост" class="add-post-sign"></div>`

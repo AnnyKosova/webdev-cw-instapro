@@ -1,14 +1,17 @@
+import { goToPage } from '../index.js';
+import { POSTS_PAGE } from '../routes.js';
 import { renderHeaderComponent } from "./header-component.js";
 import { renderUploadImageComponent } from "./upload-image-component.js";
 
 export function renderAddPostPageComponent({ appEl, onAddPostClick }) {
-  let imageUrl = ""; // Для хранения URL загруженного изображения
-  let description = ""; // Для хранения текста описания
+  let imageUrl = ""; 
+  let description = ""; 
 
   const render = () => {
     const appHtml = `
     <div class="page-container">
       <div class="header-container"></div>
+      <button class="button secondary-button" id="back-to-feed-btn" style="margin: 10px 0 0 0;">← В ленту</button>
       <div class="form">
         <h3 class="form-title">Добавить пост</h3>
         <div class="form-inputs">
@@ -22,8 +25,7 @@ export function renderAddPostPageComponent({ appEl, onAddPostClick }) {
           <div class="form-error"></div>
           <button 
             class="button" 
-            id="add-button" 
-            ${!imageUrl ? 'disabled' : ''}
+            id="add-button"
           >
             Опубликовать
           </button>
@@ -34,47 +36,59 @@ export function renderAddPostPageComponent({ appEl, onAddPostClick }) {
 
     appEl.innerHTML = appHtml;
 
-    // Рендерим шапку страницы
     renderHeaderComponent({
       element: document.querySelector(".header-container"),
     });
 
-    // Рендерим компонент загрузки изображения
+    document.getElementById("back-to-feed-btn").addEventListener("click", () => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      goToPage(POSTS_PAGE);
+    });
+
     const uploadImageContainer = appEl.querySelector(".upload-image-container");
     if (uploadImageContainer) {
       renderUploadImageComponent({
         element: uploadImageContainer,
         onImageUrlChange(newImageUrl) {
           imageUrl = newImageUrl;
-          // Активируем кнопку, когда изображение загружено
           document.getElementById("add-button").disabled = !newImageUrl;
         },
       });
     }
 
-    // Обработчик изменения текста описания
     const descriptionInput = document.getElementById("description-input");
     descriptionInput.addEventListener("input", (e) => {
       description = e.target.value;
-      // Сбрасываем ошибку при изменении текста
       document.querySelector(".form-error").textContent = "";
+      descriptionInput.classList.remove("input-error");
     });
 
-    // Обработчик клика на кнопку публикации
     document.getElementById("add-button").addEventListener("click", () => {
       description = description.trim();
       
+      let hasError = false;
+      let errorMessages = [];
       if (!description) {
         document.querySelector(".form-error").textContent = "Добавьте описание";
-        return;
+        descriptionInput.classList.add("input-error");
+        hasError = true;
+        errorMessages.push("Добавьте описание");
+      } else {
+        descriptionInput.classList.remove("input-error");
       }
-
+      const addButton = document.getElementById("add-button");
       if (!imageUrl) {
         document.querySelector(".form-error").textContent = "Загрузите изображение";
-        return;
+        addButton.classList.add("input-error");
+        hasError = true;
+        errorMessages.push("Загрузите изображение");
+      } else {
+        addButton.classList.remove("input-error");
       }
-
-      // Вызываем callback с данными поста
+      if (errorMessages.length > 0) {
+        document.querySelector(".form-error").textContent = errorMessages.join(" и ");
+      }
+      if (hasError) return;
       onAddPostClick({ description, imageUrl });
     });
   };

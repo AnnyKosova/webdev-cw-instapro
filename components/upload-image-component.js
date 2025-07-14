@@ -1,30 +1,11 @@
 import { uploadImage } from "../api.js";
 
-/**
- * Компонент загрузки изображения.
- * Этот компонент позволяет пользователю загружать изображение и отображать его превью.
- * Если изображение уже загружено, пользователь может заменить его.
- *
- * @param {HTMLElement} params.element - HTML-элемент, в который будет рендериться компонент.
- * @param {Function} params.onImageUrlChange - Функция, вызываемая при изменении URL изображения.
- *                                            Принимает один аргумент - новый URL изображения или пустую строку.
- */
 export function renderUploadImageComponent({ element, onImageUrlChange }) {
-  /**
-   * URL текущего изображения.
-   * Изначально пуст, пока пользователь не загрузит изображение.
-   * @type {string}
-   */
   let imageUrl = "";
 
-  /**
-   * Функция рендеринга компонента.
-   * Отображает интерфейс компонента в зависимости от состояния: 
-   * либо форма выбора файла, либо превью загруженного изображения с кнопкой замены.
-   */
   const render = () => {
     element.innerHTML = `
-      <div class="upload-image">
+      <div class="upload-image" id="upload-drop-area" style="position:relative;">
         ${
           imageUrl
             ? `
@@ -40,41 +21,110 @@ export function renderUploadImageComponent({ element, onImageUrlChange }) {
                 class="file-upload-input"
                 style="display:none"
               />
-              Выберите фото
+              Выберите фото или перетащите файл сюда
             </label>
           `
         }
+        <div class="drop-overlay" style="display:none;position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(86,94,239,0.12);border:2px dashed #565eef;z-index:2;"></div>
       </div>
     `;
 
-    // Обработчик выбора файла
     const fileInputElement = element.querySelector(".file-upload-input");
     fileInputElement?.addEventListener("change", () => {
       const file = fileInputElement.files[0];
-      if (file) {
+      
+      if (!file) return;
+
+      const validTypes = ["image/jpeg", "image/png", "image/gif"];
+      if (!validTypes.includes(file.type)) {
+        alert("Допустимы только JPG, PNG или GIF");
+        return;
+      }
+
+      if (file.size > 5 * 1024 * 1024) { // 5MB
+        alert("Файл слишком большой (макс. 5MB)");
+        return;
+      }
+
+      const labelEl = document.querySelector(".file-upload-label");
+      labelEl.setAttribute("disabled", true);
+      labelEl.textContent = "Загружаю файл...";
+      
+      uploadImage({ file })
+        .then(({ fileUrl }) => {
+          console.log("Загруженный URL изображения:", fileUrl);
+          imageUrl = fileUrl;
+          onImageUrlChange(imageUrl);
+          render();
+        })
+        .catch((error) => {
+          console.error("Upload failed:", error);
+          const labelEl = document.querySelector(".file-upload-label");
+          labelEl.textContent = "Ошибка загрузки";
+          labelEl.style.color = "red";
+          setTimeout(() => {
+            labelEl.textContent = "Выберите фото или перетащите файл сюда";
+            labelEl.style.color = "";
+          }, 2000);
+        });
+    });
+
+    const dropArea = element.querySelector("#upload-drop-area");
+    const overlay = element.querySelector(".drop-overlay");
+    if (dropArea) {
+      dropArea.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        overlay.style.display = "block";
+      });
+      dropArea.addEventListener("dragleave", (e) => {
+        e.preventDefault();
+        overlay.style.display = "none";
+      });
+      dropArea.addEventListener("drop", (e) => {
+        e.preventDefault();
+        overlay.style.display = "none";
+        const file = e.dataTransfer.files[0];
+        if (!file) return;
+        const validTypes = ["image/jpeg", "image/png", "image/gif"];
+        if (!validTypes.includes(file.type)) {
+          alert("Допустимы только JPG, PNG или GIF");
+          return;
+        }
+        if (file.size > 5 * 1024 * 1024) { // 5MB
+          alert("Файл слишком большой (макс. 5MB)");
+          return;
+        }
         const labelEl = document.querySelector(".file-upload-label");
         labelEl.setAttribute("disabled", true);
         labelEl.textContent = "Загружаю файл...";
-        
-        // Загружаем изображение с помощью API
-        uploadImage({ file }).then(({ fileUrl }) => {
-          imageUrl = fileUrl; // Сохраняем URL загруженного изображения
-          onImageUrlChange(imageUrl); // Уведомляем о изменении URL изображения
-          render(); // Перерисовываем компонент с новым состоянием
-        });
-      }
-    });
+        uploadImage({ file })
+          .then(({ fileUrl }) => {
+            console.log("Загруженный URL изображения:", fileUrl);
+            imageUrl = fileUrl;
+            onImageUrlChange(imageUrl);
+            render();
+          })
+          .catch((error) => {
+            console.error("Upload failed:", error);
+            const labelEl = document.querySelector(".file-upload-label");
+            labelEl.textContent = "Ошибка загрузки";
+            labelEl.style.color = "red";
+            setTimeout(() => {
+              labelEl.textContent = "Выберите фото или перетащите файл сюда";
+              labelEl.style.color = "";
+            }, 2000);
+          });
+      });
+    }
 
-    // Обработчик удаления изображения
     element
       .querySelector(".file-upload-remove-button")
       ?.addEventListener("click", () => {
-        imageUrl = ""; // Сбрасываем URL изображения
-        onImageUrlChange(imageUrl); // Уведомляем об изменении URL изображения
-        render(); // Перерисовываем компонент
+        imageUrl = "";
+        onImageUrlChange(imageUrl);
+        render();
       });
   };
 
-  // Инициализация компонента
   render();
 }
