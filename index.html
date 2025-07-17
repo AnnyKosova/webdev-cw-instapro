@@ -11,7 +11,18 @@
 
   <body>
     <div id="app"></div>
+    <div id="toast-container"></div>
+    <button id="scroll-to-top-btn" class="scroll-to-top-btn" title="Наверх">↑</button>
   </body>
-
+  <script src="./date-fns.umd.js"></script>
+  <script src="./date-fns-locale-ru.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/relativeTime.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dayjs@1/locale/ru.js"></script>
+  <script>
+    dayjs.extend(dayjs_plugin_relativeTime);
+    dayjs.locale('ru');
+  </script>
   <script type="module" src="./index.js"></script>
+  </script>
 </html>

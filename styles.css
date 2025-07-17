@@ -196,3 +196,105 @@
   width: 100%;
   text-align: center;
 }
+.like-button img {
+  transition: transform 0.3s ease;
+}
+
+.like-button:hover img {
+  transform: scale(1.1);
+}
+
+.like-button:active img {
+  transform: scale(0.9);
+}
+
+@keyframes fadeInPost {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.post.post-fade-in {
+  animation: fadeInPost 0.7s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 40px;
+  transform: translateX(-50%);
+  min-width: 220px;
+  max-width: 90vw;
+  background: #323232;
+  color: #fff;
+  padding: 16px 28px;
+  border-radius: 8px;
+  font-size: 16px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.15);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 9999;
+  transition: opacity 0.4s, bottom 0.4s;
+}
+.toast.toast-show {
+  opacity: 1;
+  bottom: 60px;
+  pointer-events: auto;
+}
+.toast.toast-error {
+  background: #d32f2f;
+}
+.toast.toast-success {
+  background: #388e3c;
+}
+
+.input-error {
+  border: 2px solid #d32f2f !important;
+  background-color: #fff0f0 !important;
+}
+
+.scroll-to-top-btn {
+  position: fixed;
+  right: 32px;
+  bottom: 32px;
+  z-index: 10000;
+  background: #565eef;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  font-size: 28px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s, bottom 0.3s;
+}
+.scroll-to-top-btn.show {
+  opacity: 1;
+  pointer-events: auto;
+  bottom: 48px;
+}
+
+.login-header-btn {
+  background: #5866ec;
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 24px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(88,102,236,0.08);
+}
+.login-header-btn:hover {
+  background: #3d4fc5;
+  box-shadow: 0 4px 16px rgba(88,102,236,0.18);
+}
