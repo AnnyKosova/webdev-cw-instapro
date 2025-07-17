@@ -65,9 +65,10 @@ export function renderAddPostPageComponent({ appEl, onAddPostClick }) {
 
     document.getElementById("add-button").addEventListener("click", () => {
       description = description.trim();
-      
+
       let hasError = false;
-      let errorMessages = [];
+      const errorMessages = [];
+
       if (!description) {
         document.querySelector(".form-error").textContent = "Добавьте описание";
         descriptionInput.classList.add("input-error");
@@ -76,7 +77,9 @@ export function renderAddPostPageComponent({ appEl, onAddPostClick }) {
       } else {
         descriptionInput.classList.remove("input-error");
       }
+
       const addButton = document.getElementById("add-button");
+
       if (!imageUrl) {
         document.querySelector(".form-error").textContent = "Загрузите изображение";
         addButton.classList.add("input-error");
@@ -85,9 +88,11 @@ export function renderAddPostPageComponent({ appEl, onAddPostClick }) {
       } else {
         addButton.classList.remove("input-error");
       }
+
       if (errorMessages.length > 0) {
         document.querySelector(".form-error").textContent = errorMessages.join(" и ");
       }
+
       if (hasError) return;
       onAddPostClick({ description, imageUrl });
     });

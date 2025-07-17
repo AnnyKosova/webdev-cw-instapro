@@ -107,13 +107,18 @@ export function renderAuthPageComponent({ appEl, setUser }) {
         const login = document.getElementById("login-input").value;
         const password = document.getElementById("password-input").value;
 
+        const errorMessages = [];
+
         if (!login) {
-          alert("Введите логин");
-          return;
+          errorMessages.push("Введите логин");
         }
 
         if (!password) {
-          alert("Введите пароль");
+          errorMessages.push("Введите пароль");
+        }
+
+        if (errorMessages.length > 0) {
+          setError(errorMessages.join(" и "));
           return;
         }
 
@@ -130,18 +135,26 @@ export function renderAuthPageComponent({ appEl, setUser }) {
         const name = document.getElementById("name-input").value;
         const password = document.getElementById("password-input").value;
 
+        const errorMessages = [];
+
         if (!name) {
-          alert("Введите имя");
-          return;
+          errorMessages.push("Введите имя");
         }
 
         if (!login) {
-          alert("Введите логин");
-          return;
+          errorMessages.push("Введите логин");
+        } else if (login.length < 3) {
+          errorMessages.push("Логин должен быть не менее 3 символов");
         }
 
         if (!password) {
-          alert("Введите пароль");
+          errorMessages.push("Введите пароль");
+        } else if (password.length < 3) {
+          errorMessages.push("Пароль должен быть не менее 3 символов");
+        }
+
+        if (errorMessages.length > 0) {
+          setError(errorMessages.join(" и "));
           return;
         }
 
